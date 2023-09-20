@@ -1,0 +1,25 @@
+body {
+  font-family: verdana;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+
+  padding: 10px;
+}
+
+header {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+footer {
+  margin-left: auto;
+  margin-right: auto;
+}
