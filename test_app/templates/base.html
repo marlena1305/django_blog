@@ -1,0 +1,31 @@
+<!-- templates/base.html -->
+{% load static %}
+<head>
+  <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+<body>
+  <center>
+    <header>
+      <h1>Mój Blog</h1>
+      {% if user.is_authenticated %}
+      <p>Hi {{ user.username }}!</p>
+
+      <a href="{% url 'logout' %}">Log out</a>
+
+      {% else %}
+      <p>You are not logged in.</p>
+      <a href="{% url 'login' %}">Log In</a>|
+      <a href="{% url 'signup' %}">Sign Up</a>
+      {% endif %} |
+      <a href="{% url 'home' %}">Home</a>
+      |
+      <a href="{% url 'about' %}">About</a>
+    </header>
+  </center>
+  <main class="center">{% block content %} {% endblock %}</main>
+  <center>
+    <footer>
+      <p>&copy; {{ year }} Blog</p>
+    </footer>
+  </center>
+</body>

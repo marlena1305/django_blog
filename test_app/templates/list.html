@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block content %}
+
+<h1>Blog</h1>
+{% if user.is_authenticated %}
+<a href="{% url 'new' %}">+ New Blog article</a>
+{% endif %}
+<ul>
+  {% for article in article_list %}
+  <h2><a href="{% url 'details' article.pk %}">{{ article.title }}</a></h2>
+
+  {% endfor %}
+</ul>
+
+{% endblock content %}
