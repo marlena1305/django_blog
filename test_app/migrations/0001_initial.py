@@ -13,7 +13,7 @@ def populate_db(apps, schema_editor):
         obj.save()
 
     tag_names = ["blog", "technologia", "plotki","zdrowie","polityka"]   
-    colors = ["light green","light blue","pink","yellow","red"]                            
+    colors = ["lightgreen","lightblue","pink","yellow","red"]                            
     Tag = apps.get_model('test_app', 'Tag')
     for i in range(0,len(tag_names)):
         obj = Tag(tag=tag_names[i],color = colors[i])
