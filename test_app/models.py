@@ -4,7 +4,7 @@ from django.urls import reverse
 class Tag(models.Model): 
     """ model opisujący tag przypisany do artykułu"""
     tag = models.CharField(max_length=140)
-    color = models.CharField(max_length=10)
+    color = models.CharField(max_length=20)
 
     def __str__(self):
         """ funkcja zwraca string"""
