@@ -1,7 +1,12 @@
 {% extends "base.html" %} {% load crispy_forms_tags %} {% block content %}
-<h2>{{ article.title }}</h2>
+<h1>{{ article.title }}</h1>
+<h3>{{ article.category }}</h3>
 <p>{{ article.body }}</p>
 
+{% for tag in article.tag.all %}
+<div class="tag" style="background-color: {{ tag.color }};">{{ tag }}</div>
+{% endfor %}
+<br />
 
 <h4>Comments</h4>
 {% for comment in article.comment_set.all %}
