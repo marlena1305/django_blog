@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
 
+
+
 class Tag(models.Model): 
     """ model opisujący tag przypisany do artykułu"""
     tag = models.CharField(max_length=140)
@@ -23,7 +25,15 @@ class Category(models.Model):
     def get_absolute_url(self):
         """ funckja zwraca url"""
         return reverse("article_list")
-    
+
+class ArticleStyle(models.Model):
+    """ model opisujący styl artykułu"""
+    background_color = models.CharField(max_length=20)
+  
+    def __str__(self):
+        return self.background_color
+
+
 class Article(models.Model):
     """ model opisujący artykuł """
     title = models.CharField(max_length=200)
@@ -34,6 +44,7 @@ class Article(models.Model):
 
     date = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    style = models.ForeignKey(ArticleStyle, on_delete=models.CASCADE)
 
     tag = models.ManyToManyField(Tag)
 

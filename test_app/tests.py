@@ -2,31 +2,44 @@ from django.test import TestCase
 from django.urls import reverse
 import pytest
 from django.contrib.auth.models import User
-from test_app.models import Article, Category, Tag
+from test_app.models import Article, Category, Tag,ArticleStyle
 from django.contrib.auth.models import User
 from django.test import Client
 
 
 
 @pytest.fixture
-def create_article(create_user, create_category, create_tag):
+def create_article(create_user, create_category, create_tag,create_style):
     """ fixture tworzący artykuł"""
     user = create_user(username="testuser", password="testpassword")
     category = create_category(category_name="Test Category")
+    style = create_style(background_color="orange")
+
     tags = [create_tag(tag_name="Tag 1", color="Red"), create_tag(tag_name="Tag 2", color="Blue")]
 
-    def _create_article(title="Test Article", author=user, category=category, tags=tags, body="This is a test article body."):
+    def _create_article(title="Test Article", author=user, category=category, tags=tags,style=style, body="This is a test article body."):
         """ funcja tworząca artykuł"""
         a = Article.objects.create(
             title=title,
             author=author,
             category=category,
-            body=body,
+            style = style,
+            body=body
         )
         a.tag.set(tags)
 
         return a
     return _create_article
+
+@pytest.fixture
+def create_style():
+    """ fixture tworzący styl artykułu"""
+    def _create_style(background_color="orange"):
+        """ funcja tworząca styl artykułu"""
+        return ArticleStyle.objects.create(background_color=background_color)
+
+    return _create_style
+
 
 @pytest.fixture
 def create_category():
@@ -125,30 +138,64 @@ class ArticleCreateViewTestCase(TestCase):
         response = self.client.get(reverse('new'))
         self.assertTemplateUsed(response, 'new.html')
 
+def create_test_article():
+    """ funkcja tworząca artykuł"""
+    user = User.objects.create_user(username="testuser", password="testpassword")
+    category = Category.objects.create(category="Test Category")
+    tag1 = Tag.objects.create(tag="Tag 1", color="Red")
+    tag2 = Tag.objects.create(tag="Tag 2", color="Blue")
+    style = ArticleStyle.objects.create(background_color="orange")
+    
+    a=Article.objects.create(
+        title="Test Article",
+        author=user,
+        category=category,
+        style=style,
+        body="This is a test article body.",
+    )
+    a.tag.set([tag1, tag2])
+    return a
+
+class ArticleUpdateViewTestCase(TestCase):
+    """ testy dla widoku update """
+    def test_article_update_view(self):
+        """ test sprawdzający czy widok update"""
+        article = create_test_article()
+        response = self.client.get(reverse('edit', kwargs={'pk': article.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Blog')  
+        self.assertTemplateUsed(response, 'edit.html')
+
+    def test_update_view_uses_correct_template(self):
+        """ test sprawdzający czy widok update wykorzystuje odpowiedni template"""
+        article = create_test_article()
+        response = self.client.get(reverse('edit', kwargs={'pk': article.pk}))
+        self.assertTemplateUsed(response, 'edit.html')
+
+
+
+class SignupViewTestCase(TestCase):
+    """ testy dla widoku signup """
+
+    def test_signup_view(self):
+        """ test sprawdzający czy widok signup zwraca ciąg 'Blog' """
+        response = self.client.get(reverse('signup'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Blog")
+
+    def test_signup_view_uses_correct_template(self):
+        """ test sprawdzający czy widok signup wykorzystuje odpowiedni template"""
+        response = self.client.get(reverse('signup'))
+        self.assertTemplateUsed(response, 'registration/signup.html')
+
 
 class ArticleDetailViewTestCase(TestCase):
     """ testy dla widoku details """
 
-    def create_article(self):
-        """ funkcja tworząca artykuł"""
-        user = User.objects.create_user(username="testuser", password="testpassword")
-        category = Category.objects.create(category="Test Category")
-        tag1 = Tag.objects.create(tag="Tag 1", color="Red")
-        tag2 = Tag.objects.create(tag="Tag 2", color="Blue")
 
-        a=Article.objects.create(
-            title="Test Article",
-            author=user,
-            category=category,
-            body="This is a test article body.",
-        )
-        a.tag.set([tag1, tag2])
-        return a
-    def test_article_creation_and_details_view(self):
+    def test_article_details_view(self):
         """ test sprawdzający czy widok details zwraca ciąg 'Blog' """
-        article = self.create_article()
-
-       
+        article = create_test_article()       
         self.assertEqual(Article.objects.count(), 1)
         self.assertEqual(article.title, "Test Article")
         self.assertEqual(str(article.author), "testuser")
@@ -156,36 +203,30 @@ class ArticleDetailViewTestCase(TestCase):
         self.assertEqual(sorted([str(tag) for tag in article.tag.all()]), ["Tag 1", "Tag 2"])
         self.assertEqual(article.body, "This is a test article body.")
 
-
         response = self.client.get(reverse('details', kwargs={'pk': article.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Blog')  
        
+    def test_details_view_uses_correct_template(self):
+        """ test sprawdzający czy widok details wykorzystuje odpowiedni template"""
+        article = create_test_article()
+        response = self.client.get(reverse('details', kwargs={'pk': article.pk}))
+        self.assertTemplateUsed(response, 'details.html')
 
-# testy dla widoku ArticleDeleteView
+
 class ArticleDeleteViewTestCase(TestCase):
     """ testy dla widoku delete """
 
-    def create_article(self):
-        """ funkcja tworząca artykuł"""
-        user = User.objects.create_user(username="testuser", password="testpassword")
-        category = Category.objects.create(category="Test Category")
-        tag1 = Tag.objects.create(tag="Tag 1", color="Red")
-        tag2 = Tag.objects.create(tag="Tag 2", color="Blue")
-
-        a=Article.objects.create(
-            title="Test Article",
-            author=user,
-            category=category,
-            body="This is a test article body.",
-        )
-        a.tag.set([tag1, tag2])
-        return a
-
     def test_article_delete_view(self):
         """ test sprawdzający czy widok delete"""
-        article = self.create_article()
+        article = create_test_article()
         response = self.client.get(reverse('delete', kwargs={'pk': article.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Blog')  
+        self.assertTemplateUsed(response, 'delete.html')
+
+    def test_delete_view_uses_correct_template(self):
+        """ test sprawdzający czy widok delete wykorzystuje odpowiedni template"""
+        article = create_test_article()
+        response = self.client.get(reverse('delete', kwargs={'pk': article.pk}))
         self.assertTemplateUsed(response, 'delete.html')

@@ -1,6 +1,6 @@
 
 from django.http import HttpResponse
-from .models import Article
+from .models import Article, ArticleStyle
 from .forms import CommentForm
 from django.views.generic import TemplateView, ListView,DetailView,View, CreateView, UpdateView, DeleteView,FormView
 from django.contrib.auth.forms import UserCreationForm
@@ -8,7 +8,8 @@ from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy , reverse
 from django.db.models import Q 
-
+from random import randint
+		
 
 
 class AboutPageView(TemplateView):
@@ -77,9 +78,11 @@ class ArticleCreateView(CreateView):
 	fields = ["title", "body","category","tag"]
 
 	def form_valid(self, form):
-		""" funkcja przypisuje obecnie zalogowanego usera do nowego obiektu Article"""
+		""" funkcja przypisuje obecnie zalogowanego usera do nowego obiektu Article oraz jego losowy style (kolor tła)"""
 		f = form.save(commit=False)
 		f.author = self.request.user
+		styles = ArticleStyle.objects.all()
+		f.style = styles[randint(0,len(styles)-1)]
 		f.save()
 		return super().form_valid(form)
 
