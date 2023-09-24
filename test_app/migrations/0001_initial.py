@@ -5,7 +5,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 def populate_db(apps, schema_editor):
-    """ wpisujemy do bazy po kilka kategorii i tagów"""
+    """ wpisujemy do bazy po kilka kategorii, tagów i kolorów tła """
     category_names = ["ogólna", "nauka", "życie"]                               
     Category = apps.get_model('test_app', 'Category')
     for name in category_names:
@@ -18,6 +18,14 @@ def populate_db(apps, schema_editor):
     for i in range(0,len(tag_names)):
         obj = Tag(tag=tag_names[i],color = colors[i])
         obj.save()
+
+    colors = ["white","yellow","orange","lightblue","lightgreen"]                            
+    ArticleStyle = apps.get_model('test_app', 'ArticleStyle')
+    for c in colors:
+        obj = ArticleStyle( background_color = c)
+        obj.save()
+
+
 
 class Migration(migrations.Migration):
 
@@ -36,6 +44,13 @@ class Migration(migrations.Migration):
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('body', models.TextField()),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+           migrations.CreateModel(
+            name='ArticleStyle',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('background_color', models.CharField(max_length=20)),
             ],
         ),
         migrations.CreateModel(
@@ -71,6 +86,12 @@ class Migration(migrations.Migration):
             model_name='article',
             name='tag',
             field=models.ManyToManyField(to='test_app.Tag'),
+        ),
+          migrations.AddField(
+            model_name='article',
+            name='style',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='test_app.ArticleStyle'),
+      
         ),
         migrations.RunPython(populate_db),
     ]
