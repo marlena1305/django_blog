@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% load crispy_forms_tags %} {% block content %}
-<h1>{{ article.title }}</h1>
+<div style="background-color: {{ article.style.background_color }};">
+
+  <h1>{{ article.title }}</h1>
 <h3>{{ article.category }}</h3>
 <p>{{ article.body }}</p>
 
@@ -19,7 +21,11 @@
   <button type="submit">Save</button>
 </form>
 
+</div>
+
+
 <a href="{% url 'edit' article.pk %}">[] Edit Blog article</a>
 <br />
 <p><a href="{% url 'delete' article.pk %}">+ Delete Blog article</a></p>
+
 {% endif %} {% endblock content %}
